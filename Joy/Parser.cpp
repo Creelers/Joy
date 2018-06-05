@@ -23,6 +23,9 @@ namespace syntax {
 				return parse_proc_decl();
 			}
 		}
+		else if (match({ TokenType::TOKEN_INT })) {
+			return std::make_unique<AstNodeExprStmt>(parse_expr());
+		}
 
 		return nullptr;
 	}
@@ -80,10 +83,19 @@ namespace syntax {
 		return std::make_unique<AstNodeVarDecl>(std::get<std::string>(name_tok.value), std::move(ty), std::move(expr));
 	}
 
+	std::unique_ptr<AstNodePrintStmt> Parser::parse_print_stmt() {
+		expect_token(TokenType::TOKEN_KEYWORD);
+		if (!match({ TokenType::TOKEN_SEMICOLON })) {
+			return std::make_unique<AstNodePrintStmt>(parse_expr());
+		} else {
+			return std::make_unique<AstNodePrintStmt>();
+		}
+	}
+
 	std::unique_ptr<AstNodeReturnStmt> Parser::parse_return_stmt() {
 		expect_token(TokenType::TOKEN_KEYWORD);
 
-		return std::make_unique<AstNodeReturnStmt>(std::move(parse_expr()));
+		return std::make_unique<AstNodeReturnStmt>(parse_expr());
 	}
 
 	std::unique_ptr<AstNodeExpr> Parser::parse_expr_operand() {
@@ -112,14 +124,29 @@ namespace syntax {
 	}
 
 	UnaryExprKind Parser::token_to_unary() {
-		if (current_token.kind == TokenType::TOKEN_SUB) {
+		if (match({ TokenType::TOKEN_SUB })) {
 			return UnaryExprKind::Neg;
 		}
 		Rk_Assert(false);
-		return UnaryExprKind::Invalid;
+		return UnaryExprKind::None;
 	}
 
-	std::unique_ptr<AstNodeExpr> Parser::parse_unary_expr() {
+	BinaryExprKind Parser::token_to_binary() {
+		if (match({ TokenType::TOKEN_SUB })) {
+			return BinaryExprKind::Sub;
+		} else if (match({ TokenType::TOKEN_ADD })) {
+			return BinaryExprKind::Add;
+		} else if (match({ TokenType::TOKEN_MUL })) {
+			return BinaryExprKind::Mul;
+		} else if (match({ TokenType::TOKEN_DIV })) {
+			return BinaryExprKind::Div;
+		}
+		Rk_Assert(false);
+		return BinaryExprKind::None;
+
+	}
+
+	std::unique_ptr<AstNodeExpr> Parser::parse_expr_unary() {
 		if (match({ TokenType::TOKEN_SUB })) {
 			auto op = token_to_unary();
 			accept_token();
@@ -132,8 +159,31 @@ namespace syntax {
 		return nullptr;
 	}
 
+	std::unique_ptr<AstNodeExpr> Parser::parse_expr_add() {
+		auto expr = parse_expr_mul();
+
+		while (match({ TokenType::TOKEN_ADD, TokenType::TOKEN_SUB })) {
+			auto op = token_to_binary();
+			accept_token();
+			expr = std::make_unique<AstNodeBinaryExpr>(op, std::move(expr), parse_expr_mul());
+		}
+		return expr;
+	}
+
+	std::unique_ptr<AstNodeExpr> Parser::parse_expr_mul() {
+		auto expr = parse_expr_unary();
+
+		while (match({ TokenType::TOKEN_MUL, TokenType::TOKEN_DIV })) {
+			auto op = token_to_binary();
+			accept_token();
+			expr = std::make_unique<AstNodeBinaryExpr>(op, std::move(expr), parse_expr_unary());
+		}
+
+		return expr;
+	}
+
 	std::unique_ptr<AstNodeExpr> Parser::parse_expr() {
-		return parse_unary_expr();
+		return parse_expr_add();
 	}
 
 	std::vector<std::unique_ptr<AstNode>> Parser::parse_block() {
@@ -143,10 +193,14 @@ namespace syntax {
 			if (match({ TokenType::TOKEN_NAME, TokenType::TOKEN_KEYWORD })) {
 				if (std::get<std::string>(current_token.value) == "return") {
 					statements.emplace_back(parse_return_stmt());
+				} else if (std::get<std::string>(current_token.value) == "print") {
+					statements.emplace_back(parse_print_stmt());
 				}
 				else {
 					statements.emplace_back(parse_var_decl());
 				}
+			} else if (match({ TokenType::TOKEN_INT })) {
+				statements.emplace_back(std::make_unique<AstNodeExprStmt>(parse_expr()));
 			}
 			expect_token(TokenType::TOKEN_SEMICOLON);
 		}

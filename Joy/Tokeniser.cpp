@@ -140,6 +140,7 @@ namespace syntax {
 				CASE1('?', TokenType::TOKEN_QUESTION)
 				CASE1(';', TokenType::TOKEN_SEMICOLON)
 				CASE1('~', TokenType::TOKEN_NEG)
+				CASE1('/', TokenType::TOKEN_DIV);
 				CASE2('!', TokenType::TOKEN_NOT, '=', TokenType::TOKEN_NOTEQ)
 				CASE2(':', TokenType::TOKEN_COLON, '=', TokenType::TOKEN_COLON_ASSIGN)
 				CASE2('=', TokenType::TOKEN_ASSIGN, '=', TokenType::TOKEN_EQ)

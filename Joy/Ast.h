@@ -20,10 +20,13 @@ namespace syntax {
 		ProcParam,
 		ProcDecl,
 		RetStmt,
+		PrintStmt,
 
 		Expr,
 		LitExpr,
 		UnaryExpr,
+		BinaryExpr,
+		ExprStmt,
 	};
 
 	struct AstNode {
@@ -75,6 +78,20 @@ namespace syntax {
 		}
 	};
 
+	struct AstNodePrintStmt : public AstNode {
+		static const NodeType n_type = NodeType::PrintStmt;
+		std::unique_ptr<AstNodeExpr> expr;
+		AstNodePrintStmt() : expr() 
+		{
+			type = n_type;
+		}
+
+		AstNodePrintStmt(std::unique_ptr<AstNodeExpr> _expr) : expr(std::move(_expr))
+		{
+			type = n_type;
+		}
+	};
+
 	struct AstNodeExpr : public AstNode {
 		static const NodeType n_type = NodeType::Expr;
 	};
@@ -99,14 +116,14 @@ namespace syntax {
 		{
 			type = n_type;
 		}
-		AstNodeLitExpr(NumberMod _mod, AstLiteralValue _value) :  value(_value)
+		AstNodeLitExpr(NumberMod _mod, AstLiteralValue _value) : value(_value)
 		{
 			type = n_type;
 		}
 	};
 
 	enum class UnaryExprKind {
-		Invalid,
+		None,
 		Neg,
 	};
 
@@ -116,7 +133,35 @@ namespace syntax {
 		std::unique_ptr<AstNodeExpr> expr;
 
 		AstNodeUnaryExpr(UnaryExprKind _kind, std::unique_ptr<AstNodeExpr> _expr) : kind(_kind), expr(std::move(_expr))
-		{ type = n_type; }
+		{
+			type = n_type;
+		}
+	};
+
+	enum class BinaryExprKind {
+		None,
+		Add,
+		Sub,
+		Mul,
+		Div,
+	};
+
+	struct AstNodeBinaryExpr : public AstNodeExpr {
+		static const NodeType n_type = NodeType::BinaryExpr;
+		BinaryExprKind kind;
+		std::unique_ptr<AstNodeExpr> left;
+		std::unique_ptr<AstNodeExpr> right;
+
+		AstNodeBinaryExpr(BinaryExprKind _kind, std::unique_ptr<AstNodeExpr> _left, std::unique_ptr<AstNodeExpr> _right) : kind(_kind), left(std::move(_left)), right(std::move(_right))
+		{
+			type = n_type;
+		}
+	};
+
+	struct AstNodeExprStmt : public AstNode {
+		static const NodeType n_type = NodeType::ExprStmt;
+		std::unique_ptr<AstNodeExpr> expr;
+		AstNodeExprStmt(std::unique_ptr<AstNodeExpr> _expr) : expr(std::move(_expr)) { type = n_type; }
 	};
 
 	template<typename T>

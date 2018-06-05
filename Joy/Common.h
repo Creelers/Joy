@@ -28,3 +28,8 @@ static_assert(sizeof(u32) == 4, "u32 wasn't right size");
 static_assert(sizeof(u64) == 8, "u64 wasn't right size");
 
 #define Rk_Assert(cond) if (!(cond)) __debugbreak();
+
+template <typename E>
+constexpr typename std::underlying_type<E>::type to_underlying(E e) noexcept {
+	return static_cast<typename std::underlying_type<E>::type>(e);
+}

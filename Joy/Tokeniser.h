@@ -8,7 +8,7 @@ namespace syntax {
 		return name == "if" || name == "else" || name == "while" ||
 			name == "for" || name == "break" || name == "continue" ||
 			name == "return" || name == "proc" || name == "struct" ||
-			name == "tpedef" || name == "const";
+			name == "tpedef" || name == "const" || name == "print";
 	}
 
 	inline u8 char_to_digit(u8 c) {
@@ -88,6 +88,7 @@ namespace syntax {
 		TOKEN_INC,
 		TOKEN_DEC,
 		TOKEN_COLON_ASSIGN,
+		TOKEN_PRINT,
 		NUM_TOKEN_KINDS,
 	};
 
@@ -153,7 +154,10 @@ namespace syntax {
 		STRINGIFY(TOKEN_INC),
 		STRINGIFY(TOKEN_DEC),
 		STRINGIFY(TOKEN_COLON_ASSIGN),
+		STRINGIFY(TOKEN_PRINT),
 	};
+
+	static_assert((sizeof(token_kind_names) / sizeof(token_kind_names[0])) == to_underlying(TokenType::NUM_TOKEN_KINDS), "Not all tokens have a string representation");
 
 #undef STRINGIFY
 

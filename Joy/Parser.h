@@ -20,14 +20,19 @@ namespace syntax {
 		std::vector<std::unique_ptr<AstNode>> parse_block();
 		std::unique_ptr<AstNodeVarDecl> parse_var_decl();
 		std::unique_ptr<AstNodeReturnStmt> parse_return_stmt();
+		std::unique_ptr<AstNodePrintStmt> Parser::parse_print_stmt();
 		std::unique_ptr<AstNodeExpr> parse_expr_operand();
 		std::unique_ptr<AstNodeExpr> parse_expr_base();
-		std::unique_ptr<AstNodeExpr> parse_unary_expr();
+		std::unique_ptr<AstNodeExpr> parse_expr_add();
+		std::unique_ptr<AstNodeExpr> parse_expr_mul();
+		std::unique_ptr<AstNodeExpr> parse_expr_unary();
 		std::unique_ptr<AstNodeExpr> parse_expr();
 
 		std::unique_ptr<TypeSpec> parse_type();
 
 		UnaryExprKind token_to_unary();
+		BinaryExprKind Parser::token_to_binary();
+
 
 		Token accept_token();
 		void expect_token(TokenType type);

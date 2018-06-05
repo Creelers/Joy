@@ -28,8 +28,26 @@ namespace front {
 			Literal(syntax::AstLiteralValue _expr) : expr(_expr) {}
 		};
 
+		struct Expression;
+		struct ExpressionStatement {
+			std::unique_ptr<Expression> expr;
+
+			ExpressionStatement() : expr() {}
+			ExpressionStatement(std::unique_ptr<Expression> _expr) : expr(std::move(_expr)) {}
+		};
+
+		struct BinaryExpression {
+			syntax::BinaryExprKind kind;
+			std::unique_ptr<Expression> left;
+			std::unique_ptr<Expression> right;
+		};
+
 		struct Expression {
-			std::variant<Literal> expr;
+			std::variant<
+				Literal, 
+				ExpressionStatement,
+				BinaryExpression
+			> expr;
 		};
 
 		struct VarDecl {
@@ -42,11 +60,20 @@ namespace front {
 			std::unique_ptr<Expression> expr;
 		};
 
+		struct Print {
+			std::unique_ptr<Expression> expr;
+			//Print() : expr() {}
+		};
+
 		struct Statement {
 			std::variant<
 				VarDecl,
-				Return
+				Return,
+				Print,
+				ExpressionStatement
 			> stmt;
+
+			
 		};
 
 		struct ProcParam {

@@ -31,7 +31,6 @@ namespace front {
 		std::unique_ptr<resolved::TypeSpec> resolve_type(std::unique_ptr<syntax::TypeSpec>& type);
 		std::unique_ptr<resolved::Statement> resolve_statement(std::unique_ptr<syntax::AstNode>& statement);
 		std::unique_ptr<resolved::Expression> resolve_expression(std::unique_ptr<syntax::AstNodeExpr>& expr);
-		//Symbol resolve_name(const std::string& name);
 
 		std::map<std::string, Proc> procs;
 		std::vector<std::map<std::string, Symbol>> scopes;
