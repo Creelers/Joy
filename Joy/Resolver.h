@@ -13,7 +13,7 @@ namespace front {
 	public:
 		Resolver(Symbols& syms) : symbols(syms) {}
 
-		resolved::ResolvedAst resolve_tree(std::vector<std::unique_ptr<syntax::AstNode>>& _tree);
+		std::unique_ptr<resolved::ResolvedAst> resolve_tree(std::vector<std::unique_ptr<syntax::AstNode>>& _tree);
 
 	private:
 
@@ -27,7 +27,11 @@ namespace front {
 		void collect_globals(std::vector<std::unique_ptr<syntax::AstNode>>& tree);
 		void add_proc(std::string& name, std::vector<std::string>& param_names);
 		std::unique_ptr<resolved::Proc> resolve_proc(syntax::AstNodeProcDecl *proc);
-
+		std::vector<std::unique_ptr<resolved::ProcParam>> resolve_params(std::vector<std::unique_ptr<syntax::AstNodeProcParam>>& params);
+		std::unique_ptr<resolved::TypeSpec> resolve_type(std::unique_ptr<syntax::TypeSpec>& type);
+		std::unique_ptr<resolved::Statement> resolve_statement(std::unique_ptr<syntax::AstNode>& statement);
+		std::unique_ptr<resolved::Expression> resolve_expression(std::unique_ptr<syntax::AstNodeExpr>& expr);
+		//Symbol resolve_name(const std::string& name);
 
 		std::map<std::string, Proc> procs;
 		std::vector<std::map<std::string, Symbol>> scopes;

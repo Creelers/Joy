@@ -27,8 +27,4 @@ static_assert(sizeof(u16) == 2, "u16 wasn't right size");
 static_assert(sizeof(u32) == 4, "u32 wasn't right size");
 static_assert(sizeof(u64) == 8, "u64 wasn't right size");
 
-#ifdef _DEBUG 
 #define Rk_Assert(cond) if (!(cond)) __debugbreak();
-#else
-#define Rk_Assert(cond)
-#endif

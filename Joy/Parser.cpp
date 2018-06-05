@@ -31,12 +31,12 @@ namespace syntax {
 		auto name_tok = current_token;
 		expect_token(TokenType::TOKEN_NAME);
 		auto params = parse_params();
+		expect_token(TokenType::TOKEN_RPAREN);
 		std::unique_ptr<TypeSpec> ret_ty;
 		if (match({ TokenType::TOKEN_COLON })) {
 			accept_token();
 			ret_ty = std::move(parse_type());
 		}
-
 		expect_token(TokenType::TOKEN_LBRACE);
 		auto block = parse_block();
 		expect_token(TokenType::TOKEN_RBRACE);
@@ -60,8 +60,6 @@ namespace syntax {
 			}
 			else {
 				saw_comma = false;
-				expect_token(TokenType::TOKEN_RPAREN);
-				break;
 			}
 		}
 
@@ -94,9 +92,8 @@ namespace syntax {
 			val.kind = LiteralKind::Int;
 			val.value = std::get<u64>(current_token.value);
 			val.base = current_token.base;
-			NumberMod mod = current_token.mod;
 			accept_token();
-			return std::make_unique<AstNodeLitExpr>(mod, val);
+			return std::make_unique<AstNodeLitExpr>(val);
 		}
 		else if (match({ TokenType::TOKEN_NAME })) {
 			AstLiteralValue val;

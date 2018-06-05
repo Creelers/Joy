@@ -94,13 +94,12 @@ namespace syntax {
 
 	struct AstNodeLitExpr : public AstNodeExpr {
 		static const NodeType n_type = NodeType::LitExpr;
-		NumberMod mod;
 		AstLiteralValue value;
 		AstNodeLitExpr(AstLiteralValue _value) : value(_value)
 		{
 			type = n_type;
 		}
-		AstNodeLitExpr(NumberMod _mod, AstLiteralValue _value) : mod(_mod), value(_value)
+		AstNodeLitExpr(NumberMod _mod, AstLiteralValue _value) :  value(_value)
 		{
 			type = n_type;
 		}
