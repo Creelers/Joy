@@ -53,7 +53,8 @@ namespace syntax {
 
 		bool saw_comma = false;
 		while (!match({ TokenType::TOKEN_RPAREN }) || saw_comma) {
-			auto name_tok = accept_token();
+			auto name_tok = current_token;
+			expect_token(TokenType::TOKEN_NAME);
 			expect_token(TokenType::TOKEN_COLON);
 			auto ty = parse_type();
 			params.emplace_back(std::make_unique<AstNodeProcParam>(std::get<std::string>(name_tok.value), std::move(ty)));

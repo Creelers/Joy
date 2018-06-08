@@ -4,28 +4,19 @@
 namespace front {
 	std::unique_ptr<resolved::ResolvedAst> Resolver::resolve_tree(std::vector<std::unique_ptr<syntax::AstNode>>& tree) {
 		std::vector<std::unique_ptr<resolved::Proc>> procs;
-		collect_globals(tree);
 		for (auto& node : tree) {
 			syntax::AstNodeProcDecl *proc = reinterpret_cast<syntax::AstNodeProcDecl*>(node.get());
 			if (proc != nullptr) {
+				std::vector<std::string> param_names;
+				std::transform(proc->params.begin(), proc->params.end(), std::back_inserter(param_names), [](const auto& p) -> auto { return p->name; });
+				add_proc(proc->name, param_names);
 				procs.emplace_back(std::move(resolve_proc(proc)));
 			}
 		}
 
 		return std::make_unique<resolved::ResolvedAst>(std::move(procs));
 	}
-
-	void Resolver::collect_globals(std::vector<std::unique_ptr<syntax::AstNode>>& tree) {
-		for (auto& node : tree) {
-			syntax::AstNodeProcDecl *proc = reinterpret_cast<syntax::AstNodeProcDecl*>(node.get());
-			if (proc != nullptr) {
-				std::vector<std::string> param_names;
-				std::transform(proc->params.begin(), proc->params.end(), std::back_inserter(param_names), [](const auto& p) -> auto {return p->name; });
-				add_proc(proc->name, param_names);
-			}
-		}
-	}
-
+	
 	void Resolver::add_proc(std::string& name, std::vector<std::string>& param_names) {
 		if (procs.count(name) == 1) {
 			//already defined
@@ -38,11 +29,19 @@ namespace front {
 
 	std::unique_ptr<resolved::Proc> Resolver::resolve_proc(syntax::AstNodeProcDecl *proc) {
 		auto sym = procs.find(proc->name)->second.name;
+
+		scopes.push_back(std::map<std::string, Symbol>());
 		auto params = resolve_params(proc->params);
 		auto ret_ty = resolve_type(proc->ret);
+				
+		for (auto& p : params) {
+			add_local(symbols.get_name(p->name), p->name);
+		}
 
 		std::vector<std::unique_ptr<resolved::Statement>> statements;
-		std::transform(proc->statements.begin(), proc->statements.end(), std::back_inserter(statements), [this](auto& s) -> auto {return resolve_statement(s); });
+		std::transform(proc->statements.begin(), proc->statements.end(), std::back_inserter(statements), [this](auto& s) -> auto { return resolve_statement(s); });
+
+		scopes.clear();
 
 		return std::make_unique<resolved::Proc>(sym, std::move(params), std::move(ret_ty), std::move(statements));
 	}
@@ -52,6 +51,10 @@ namespace front {
 		for (auto& p : params) {
 			auto symbol = symbols.new_symbol(p->name);
 			auto ty = resolve_type(p->ty);
+			if (find_local(p->name)) {
+				Rk_Assert(false); //already declared
+			}
+			add_local(p->name, symbol);
 			resolved_params.emplace_back(std::make_unique<resolved::ProcParam>(symbol, std::move(ty)));
 		}
 
@@ -89,6 +92,22 @@ namespace front {
 			stmt.stmt = std::move(expr_stmt);
 			return std::make_unique<resolved::Statement>(std::move(stmt));
 		}
+		case syntax::NodeType::VarDecl: {
+			auto node = dynamic_cast<syntax::AstNodeVarDecl *>(statement.get());
+			resolved::VarDecl var_decl;
+			var_decl.name = symbols.new_symbol(node->name);
+			if (find_local(node->name)) {
+				Rk_Assert(false); //declared already
+			}
+			add_local(node->name, var_decl.name);
+			var_decl.ty = resolve_type(node->ty);
+			resolved::Statement stmt;
+			if (node->expr) {
+				var_decl.expr = std::move(resolve_expression(node->expr));
+			}
+			stmt.stmt = std::move(var_decl);
+			return std::make_unique<resolved::Statement>(std::move(stmt));
+		}
 		}
 
 		//unexpected statement
@@ -118,8 +137,8 @@ namespace front {
 			return std::make_unique<resolved::Expression>(std::move(expression));
 		}
 		}
-		//unexpect expression
-		//Rk_Assert(false);
+		//unexpected expression
+		Rk_Assert(false);
 		return nullptr;
 	}
 
@@ -140,5 +159,15 @@ namespace front {
 		else {
 			return nullptr;
 		}
+	}
+
+	void Resolver::add_local(const std::string& name, Symbol symbol) {
+		auto& scope = scopes.back();
+		scope.insert(std::make_pair(name, symbol));
+	}
+
+	bool Resolver::find_local(const std::string& name) {
+		auto& scope = scopes.back();
+		return scope.count(name) == 1;
 	}
 }

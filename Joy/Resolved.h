@@ -62,7 +62,6 @@ namespace front {
 
 		struct Print {
 			std::unique_ptr<Expression> expr;
-			//Print() : expr() {}
 		};
 
 		struct Statement {

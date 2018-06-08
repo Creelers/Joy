@@ -13,7 +13,7 @@ int main(int argc, const char argv[]) {
 	(void)argc;
 	(void)argv;
 
-	std::string src("proc main(): s32 { 2 * 10; print; return 0; }");
+	std::string src("proc main(argc: s32): s32 { a: s32 = 2 * 10; 21 + 21; print; return 0; }");
 	
 	Tokeniser tokeniser(src);
 	Parser parser(tokeniser);
