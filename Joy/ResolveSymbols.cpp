@@ -1,8 +1,8 @@
-#include "Resolver.h"
+#include "ResolveSymbols.h"
 #include <algorithm>
 
 namespace front {
-	std::unique_ptr<resolved::ResolvedAst> Resolver::resolve_tree(std::vector<std::unique_ptr<syntax::AstNode>>& tree) {
+	std::unique_ptr<resolved::Program> Resolver::resolve_tree(std::vector<std::unique_ptr<syntax::AstNode>>& tree) {
 		std::vector<std::unique_ptr<resolved::Proc>> procs;
 		for (auto& node : tree) {
 			syntax::AstNodeProcDecl *proc = reinterpret_cast<syntax::AstNodeProcDecl*>(node.get());
@@ -14,7 +14,7 @@ namespace front {
 			}
 		}
 
-		return std::make_unique<resolved::ResolvedAst>(std::move(procs));
+		return std::make_unique<resolved::Program>(std::move(procs));
 	}
 	
 	void Resolver::add_proc(std::string& name, std::vector<std::string>& param_names) {
@@ -115,11 +115,19 @@ namespace front {
 		return nullptr;
 	}
 
+	struct LiteralVistor {
+		LiteralVistor(Symbols& syms) : symbols(syms) {}
+		resolved::literal_v operator()(const std::string& s) { resolved::literal_v ret; ret = symbols.new_symbol(s); return ret; }
+		resolved::literal_v operator()(const u64 u) { resolved::literal_v ret; ret = u; return ret; }
+		Symbols& symbols;
+	};
+
+
 	std::unique_ptr<resolved::Expression> Resolver::resolve_expression(std::unique_ptr<syntax::AstNodeExpr>& expr) {
 		switch (expr->type) {
 		case syntax::NodeType::LitExpr: {
 			auto lit = dynamic_cast<syntax::AstNodeLitExpr *>(expr.get());
-			auto lit_val = resolved::Literal(lit->value);
+			auto lit_val = std::visit(LiteralVistor(symbols), lit->value.value);
 			resolved::Expression ret;
 			ret.expr = lit_val;
 			return std::make_unique<resolved::Expression>(std::move(ret));

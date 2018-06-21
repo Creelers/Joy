@@ -116,18 +116,22 @@
   <ItemGroup>
     <ClCompile Include="Parser.cpp" />
     <ClCompile Include="Resolved.h" />
-    <ClCompile Include="Resolver.cpp" />
+    <ClCompile Include="ResolveSymbols.cpp" />
     <ClCompile Include="Source.cpp" />
+    <ClCompile Include="Spanned.h" />
     <ClCompile Include="Tokeniser.cpp" />
+    <ClCompile Include="TypeCheck.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Ast.h" />
     <ClInclude Include="Common.h" />
+    <ClInclude Include="Compile.h" />
     <ClInclude Include="Parser.h" />
-    <ClInclude Include="Resolver.h" />
+    <ClInclude Include="ResolveSymbols.h" />
     <ClInclude Include="Symbol.h" />
     <ClInclude Include="Tokeniser.h" />
-    <ClInclude Include="VirtualMachine.h" />
+    <ClInclude Include="TypeCheck.h" />
+    <ClInclude Include="Typed.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -104,9 +104,8 @@ namespace syntax {
 	};
 
 	struct AstLiteralValue {
-		LiteralKind kind;
 		s32 base;
-		std::variant<u64, double, bool, std::string> value;
+		std::variant<u64, std::string> value;
 	};
 
 	struct AstNodeLitExpr : public AstNodeExpr {

@@ -13,7 +13,7 @@ namespace front {
 	public:
 		Resolver(Symbols& syms) : symbols(syms) {}
 
-		std::unique_ptr<resolved::ResolvedAst> resolve_tree(std::vector<std::unique_ptr<syntax::AstNode>>& _tree);
+		std::unique_ptr<resolved::Program> resolve_tree(std::vector<std::unique_ptr<syntax::AstNode>>& _tree);
 
 	private:
 

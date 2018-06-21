@@ -165,7 +165,7 @@ namespace syntax {
 		TokenType kind;
 		NumberMod mod;
 		s32 base;
-		std::variant <u64, double, std::string>  value;
+		std::variant<u64, double, std::string>  value;
 	};
 
 	class Tokeniser {

@@ -102,7 +102,6 @@ namespace syntax {
 	std::unique_ptr<AstNodeExpr> Parser::parse_expr_operand() {
 		if (match({ TokenType::TOKEN_INT })) {
 			AstLiteralValue val;
-			val.kind = LiteralKind::Int;
 			val.value = std::get<u64>(current_token.value);
 			val.base = current_token.base;
 			accept_token();
@@ -110,7 +109,6 @@ namespace syntax {
 		}
 		else if (match({ TokenType::TOKEN_NAME })) {
 			AstLiteralValue val;
-			val.kind = LiteralKind::String;
 			val.value = std::get<std::string>(current_token.value);
 			accept_token();
 			return std::make_unique<AstNodeLitExpr>(val);

@@ -11,7 +11,7 @@ namespace front {
 
 		Symbols() { next_symbol = 0; }
 
-		Symbol new_symbol(std::string& name) {
+		Symbol new_symbol(const std::string& name) {
 			auto symbol = next_symbol;
 			next_symbol += 1;
 			symbols.insert(std::make_pair(symbol, name));

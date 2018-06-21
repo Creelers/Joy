@@ -21,11 +21,12 @@ namespace front {
 			TypeSpec(TypeSpecKind _kind, std::unique_ptr<TypeSpec> _base) : kind(_kind), base(std::move(_base)) {}
 		};
 
+		typedef std::variant<u64, Symbol> literal_v;
 		struct Literal {
-			syntax::AstLiteralValue expr;
+			literal_v expr;
 
 			Literal() {}
-			Literal(syntax::AstLiteralValue _expr) : expr(_expr) {}
+			Literal(literal_v _expr) : expr(_expr) {}
 		};
 
 		struct Expression;
@@ -42,12 +43,13 @@ namespace front {
 			std::unique_ptr<Expression> right;
 		};
 
+		typedef std::variant<
+			Literal,
+			ExpressionStatement,
+			BinaryExpression
+		> expression_v;
 		struct Expression {
-			std::variant<
-				Literal, 
-				ExpressionStatement,
-				BinaryExpression
-			> expr;
+			expression_v expr;
 		};
 
 		struct VarDecl {
@@ -94,11 +96,11 @@ namespace front {
 			{}
 		};
 
-		struct ResolvedAst {
+		struct Program {
 			std::vector<std::unique_ptr<Proc>> procs;
 
-			ResolvedAst() {}
-			ResolvedAst(std::vector<std::unique_ptr<Proc>> _procs) : procs(std::move(_procs)) {}
+			Program() {}
+			Program(std::vector<std::unique_ptr<Proc>> _procs) : procs(std::move(_procs)) {}
 		};
 	}
 }
